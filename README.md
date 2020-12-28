@@ -1,2 +1,2 @@
 # image-encryption
-Encryption / Decryption of images with AES-CBC 
+Encryption / decryption of images with AES/CBC in Python 3

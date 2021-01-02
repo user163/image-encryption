@@ -31,11 +31,18 @@ The following settings are possible in PyImgEnc.py:
 
 ### Example
 
-- Original image
+Original image
+
 ![Alt text](orig.jpg?raw=true "Title")
 
-- Encrypted image (CBC mode)
+Encrypted image (CBC mode)
 
-- Encrypted image (ECB mode)
+![Alt text](cbc.jpg?raw=true "Title")
 
-- Decrypted image
+Encrypted image (ECB mode)
+
+![Alt text](ecb.jpg?raw=true "Title")
+
+Decrypted image
+
+![Alt text](decrypted.jpg?raw=true "Title")

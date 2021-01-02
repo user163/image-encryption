@@ -25,7 +25,7 @@ paddedLenSize = 4
 #
 
 # Load original image
-imageOrig = cv2.imread("colibri.jpg")
+imageOrig = cv2.imread("topsecret.jpg")
 rowOrig, columnOrig, depthOrig = imageOrig.shape
 
 # Check for minimum width
@@ -63,8 +63,8 @@ cv2.waitKey()
 # If the encrypted image is to be stored, a format must be chosen that does not change the data. Otherwise, 
 # decryption is not possible after loading the encrypted image. bmp does not change the data, but jpg does. 
 # When saving with imwrite, the format is controlled by the extension (.jpg, .bmp). The following works:
-# cv2.imwrite("colibriEnc.bmp", imageEncrypted)
-# imageEncrypted = cv2.imread("colibriEnc.bmp")
+# cv2.imwrite("topsecretEnc.bmp", imageEncrypted)
+# imageEncrypted = cv2.imread("topsecretEnc.bmp")
 
 #
 # Start Decryption ----------------------------------------------------------------------------------------------

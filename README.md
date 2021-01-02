@@ -1,5 +1,5 @@
 # image-encryption
-Encryption / decryption of images with AES (CBC and ECB mode supported) in Python 3
+Encryption / decryption of images with AES in Python 3 (CBC and ECB mode supported)
 
 ### Dependencies
 
@@ -27,7 +27,7 @@ The following settings are possible in PyImgEnc.py:
 
 - Start the program under Windows in the comand prompt with: py pyimgenc.py 
 
-- Once the program is started, the original image is displayed first. A click on any key displays the encrypted image. A further kick displays the decrypted image. Another click deletes all images and exits the program. 
+- Once the program is started, the original image is displayed first. A click on any key displays the encrypted image. A further click displays the decrypted image. Another click deletes all images and exits the program. 
 
 ### Example
 

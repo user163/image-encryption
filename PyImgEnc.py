@@ -5,7 +5,7 @@ from Crypto.Util.Padding import pad, unpad
 from Crypto.Random import get_random_bytes
 import sys
 
-# This program encrypts a jpg With AES-256/CBC. The encrypted image contains more data than the original image (e.g. because of 
+# This program encrypts a jpg With AES-256. The encrypted image contains more data than the original image (e.g. because of 
 # padding, IV etc.). Therefore the encrypted image has one row more. Supported are CBC and ECB mode.
 
 # Set mode

@@ -1,9 +1,9 @@
+import sys
 import cv2
 import numpy as np
 from Crypto.Cipher import AES
 from Crypto.Util.Padding import pad, unpad
 from Crypto.Random import get_random_bytes
-import sys
 
 # This program encrypts a jpg With AES-256. The encrypted image contains more data than the original image (e.g. because of 
 # padding, IV etc.). Therefore the encrypted image has one row more. Supported are CBC and ECB mode.
@@ -18,7 +18,6 @@ if mode != AES.MODE_CBC and mode != AES.MODE_ECB:
 # Set sizes
 keySize = 32
 ivSize = AES.block_size if mode == AES.MODE_CBC else 0
-paddedLenSize = 4
 
 #
 # Start Encryption ----------------------------------------------------------------------------------------------
@@ -29,8 +28,9 @@ imageOrig = cv2.imread("topsecret.jpg")
 rowOrig, columnOrig, depthOrig = imageOrig.shape
 
 # Check for minimum width
-if columnOrig < (AES.block_size + AES.block_size + paddedLenSize) / 3:
-    print('The minimum width of the image must be (16 [=IV] + 16 [=max padding)] + 4 [=padding length]) / 3 = 12 pixels, so that IV, padding and padding length can be stored in a single additional row!')
+minWidth = (AES.block_size + AES.block_size) // depthOrig + 1
+if columnOrig < minWidth:
+    print('The minimum width of the image must be {} pixels, so that IV and padding can be stored in a single additional row!'.format(minWidth))
     sys.exit()
 
 # Display original image
@@ -48,23 +48,23 @@ imageOrigBytesPadded = pad(imageOrigBytes, AES.block_size)
 ciphertext = cipher.encrypt(imageOrigBytesPadded)
 
 # Convert ciphertext bytes to encrypted image data
-# -> The additional row contains the following number of data: columnOrig * DepthOrig
-# -> The additional row contains data of the following length: ivSize, paddedLenSize, paddedSize
-# -> The free space in the additional row is: void = columnOrig * DepthOrig - ivSize - paddedLenSize - paddedSize
+#    The additional row contains columnOrig * DepthOrig bytes. Of this, ivSize + paddedSize bytes are used 
+#    and void = columnOrig * DepthOrig - ivSize - paddedSize bytes unused
 paddedSize = len(imageOrigBytesPadded) - len(imageOrigBytes)
-void = columnOrig * depthOrig - ivSize - paddedLenSize - paddedSize
-ivCiphertext = iv + paddedSize.to_bytes(paddedLenSize, byteorder='big', signed=False) + ciphertext + bytes(void)
-imageEncrypted = np.frombuffer(ivCiphertext, dtype = imageOrig.dtype).reshape(rowOrig + 1, columnOrig, depthOrig)
+void = columnOrig * depthOrig - ivSize - paddedSize
+ivCiphertextVoid = iv + ciphertext + bytes(void)
+imageEncrypted = np.frombuffer(ivCiphertextVoid, dtype = imageOrig.dtype).reshape(rowOrig + 1, columnOrig, depthOrig)
 
 # Display encrypted image
 cv2.imshow("Encrypted image", imageEncrypted)
 cv2.waitKey()
 
-# If the encrypted image is to be stored, a format must be chosen that does not change the data. Otherwise, 
-# decryption is not possible after loading the encrypted image. bmp does not change the data, but jpg does. 
-# When saving with imwrite, the format is controlled by the extension (.jpg, .bmp). The following works:
-# cv2.imwrite("topsecretEnc.bmp", imageEncrypted)
-# imageEncrypted = cv2.imread("topsecretEnc.bmp")
+# Save the encrypted image (optional)
+#    If the encrypted image is to be stored, a format must be chosen that does not change the data. Otherwise, 
+#    decryption is not possible after loading the encrypted image. bmp does not change the data, but jpg does. 
+#    When saving with imwrite, the format is controlled by the extension (.jpg, .bmp). The following works:
+#    cv2.imwrite("topsecretEnc.bmp", imageEncrypted)
+#    imageEncrypted = cv2.imread("topsecretEnc.bmp")
 
 #
 # Start Decryption ----------------------------------------------------------------------------------------------
@@ -75,9 +75,9 @@ rowEncrypted, columnOrig, depthOrig = imageEncrypted.shape
 rowOrig = rowEncrypted - 1
 encryptedBytes = imageEncrypted.tobytes()
 iv = encryptedBytes[:ivSize]
-paddedSize = int.from_bytes(encryptedBytes[ivSize:ivSize + paddedLenSize], byteorder='big', signed=False)
-void = columnOrig * depthOrig - ivSize - paddedLenSize - paddedSize
-encrypted = encryptedBytes[ivSize + paddedLenSize : len(encryptedBytes) - void]
+imageOrigBytesSize = rowOrig * columnOrig * depthOrig
+paddedSize = (imageOrigBytesSize // AES.block_size + 1) * AES.block_size - imageOrigBytesSize
+encrypted = encryptedBytes[ivSize : ivSize + imageOrigBytesSize + paddedSize]
 
 # Decrypt
 cipher = AES.new(key, AES.MODE_CBC, iv) if mode == AES.MODE_CBC else AES.new(key, AES.MODE_ECB)
